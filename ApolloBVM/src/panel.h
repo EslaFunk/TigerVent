@@ -3,14 +3,15 @@
 
 #include "buttonmanager.h"
 #include "encodermanager.h"
-#include "nhd_0420d3z.h"
+#include "lcd2004.h"
+//#include "nhd_0420d3z.h"
 #include "ventsettings.h"
 #include "Encoder.h"
 
 class Panel {
   public:
 
-    Panel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr);
+    Panel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr);
 
     // Virtual methods for each panel to inherit.
     virtual void start() = 0;
@@ -18,10 +19,10 @@ class Panel {
 
   protected:
 
-    // Pointers for display.
-    NhdDisplay* _disp_ptr;
 
-    // Pointers for user inputs.
+    // Pointers for settings and input.
+    Lcd2004* _disp_ptr;
+
     Encoder* _encoder_ptr;
     ButtonManager* _em_button_ptr;
     ButtonManager* _stop_button_ptr;
@@ -34,7 +35,7 @@ class Panel {
 
 class SplashPanel : public Panel {
   public:
-    SplashPanel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String* text, int display_time, Panel** next_ptr);
+    SplashPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String* text, int display_time, Panel** next_ptr);
 
     // Panel to display splash text for a specified amout of time.
     void start();
@@ -56,7 +57,8 @@ class SplashPanel : public Panel {
 
 class EditPanel : public Panel {
   public:
-    EditPanel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, VentLimits* vl_ptr, String top_text, Panel** run_panel_ptr, Panel** stop_panel_ptr);
+    EditPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, VentLimits* vl_ptr, String top_text, Panel** run_panel_ptr, Panel** stop_panel_ptr);
+
 
     // Panel to edit ventilator parameters.
     void start();
@@ -108,7 +110,7 @@ class EditPanel : public Panel {
 
 class RunningPanel : public Panel {
   public:
-    RunningPanel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr);
+    RunningPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr);
 
     // Panel to display current time counter and current settings.
     void start();
@@ -142,7 +144,7 @@ class RunningPanel : public Panel {
 
 class PausePanel : public Panel {
   public:
-    PausePanel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** run_panel_ptr);
+    PausePanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** run_panel_ptr);
 
     // Panel to display time ventilated and settings during pause.
     void start();

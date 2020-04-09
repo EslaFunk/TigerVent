@@ -12,7 +12,7 @@
 #define STOP_BUTTON_PIN 11
 
 // Init peripherals.
-NhdDisplay display(DISPLAY_PIN);
+Lcd2004 display(DISPLAY_PIN);
 Encoder enc(ENC_DT_PIN, ENC_CLK_PIN);
 ButtonManager encoder_button(ENC_BUTTON_PIN, true);
 ButtonManager stop_button(STOP_BUTTON_PIN, false);
@@ -48,7 +48,7 @@ void setup()
   Wire.begin();
 
   // Start serial debug connection.
-  Serial.begin(9600);
+//  Serial.begin(9600);
 
   // Start display.
   display.begin(9600);
@@ -133,7 +133,7 @@ void transmit() {
 
   // Send i2c message.
   Wire.endTransmission();
-
+`
   // Sent settings so disable send.
   vs.send = false;
 }
