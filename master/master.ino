@@ -3,7 +3,7 @@
 
 #define SLAVE_ADDR 8
 
-NhdDisplay display(3);
+Lcd2004 display(3);
 Encoder enc(5,6);
 ButtonManager encoder_button(7, true);
 ButtonManager stop_button(11, false);
@@ -116,7 +116,7 @@ void transmit() {
 
   // Send i2c message.
   Wire.endTransmission();
-
+`
   // Sent settings so disable send.
   vs.send = false;
 

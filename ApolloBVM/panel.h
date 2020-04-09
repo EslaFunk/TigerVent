@@ -3,14 +3,15 @@
 
 #include "buttonmanager.h"
 #include "encodermanager.h"
-#include "nhd_0420d3z.h"
+#include "lcd2004.h"
+//#include "nhd_0420d3z.h"
 #include "ventsettings.h"
 #include "Encoder.h"
 
 class Panel {
   public:
 
-    Panel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr);
+    Panel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr);
 
     virtual void start() = 0;
     virtual Panel* update() = 0;
@@ -18,7 +19,7 @@ class Panel {
   protected:
 
     // Pointers for settings and input.
-    NhdDisplay* _disp_ptr;
+    Lcd2004* _disp_ptr;
     Encoder* _encoder_ptr;
     ButtonManager* _em_button_ptr;
     ButtonManager* _stop_button_ptr;
@@ -29,7 +30,7 @@ class Panel {
 
 class SplashPanel : public Panel {
   public:
-    SplashPanel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String* text, int display_time, Panel** next_ptr);
+    SplashPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String* text, int display_time, Panel** next_ptr);
 
     void start();
     Panel* update();
@@ -46,7 +47,7 @@ class SplashPanel : public Panel {
 
 class EditPanel : public Panel {
   public:
-    EditPanel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String top_text, Panel** run_panel_ptr, Panel** stop_panel_ptr);
+    EditPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String top_text, Panel** run_panel_ptr, Panel** stop_panel_ptr);
 
     void start();
     Panel* update();
@@ -94,7 +95,7 @@ class EditPanel : public Panel {
 
 class RunningPanel : public Panel {
   public:
-    RunningPanel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr);
+    RunningPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr);
 
     void start();
     Panel* update();
@@ -123,7 +124,7 @@ class RunningPanel : public Panel {
 
 class PausePanel : public Panel {
   public:
-    PausePanel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** run_panel_ptr);
+    PausePanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** run_panel_ptr);
 
     void start();
     Panel* update();

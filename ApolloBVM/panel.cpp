@@ -1,14 +1,14 @@
 #include "panel.h"
 
 
-Panel::Panel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr) :
+Panel::Panel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr) :
   _disp_ptr(disp_ptr),
   _encoder_ptr(encoder_ptr),
   _em_button_ptr(em_button_ptr),
   _stop_button_ptr(stop_button_ptr),
   _vs_ptr(vs_ptr) {}
 
-SplashPanel::SplashPanel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String* text, int display_time, Panel** next_ptr) :
+SplashPanel::SplashPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String* text, int display_time, Panel** next_ptr) :
   Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr},
   _next_d_ptr(next_ptr),
   _display_time(display_time),
@@ -37,7 +37,7 @@ Panel* SplashPanel::update() {
   return _next_ptr;
 }
 
-EditPanel::EditPanel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String top_text, Panel** run_panel_ptr, Panel** stop_panel_ptr) :
+EditPanel::EditPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String top_text, Panel** run_panel_ptr, Panel** stop_panel_ptr) :
   Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr},
   _top_text(top_text),
   _run_panel_d_ptr(run_panel_ptr),
@@ -233,7 +233,7 @@ Panel* EditPanel::update() {
   return 0;
 }
 
-RunningPanel::RunningPanel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr) :
+RunningPanel::RunningPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr) :
   Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr},
   _apply_panel_d_ptr(apply_panel_ptr), 
   _stop_panel_d_ptr(stop_panel_ptr) {}
@@ -312,7 +312,7 @@ Panel* RunningPanel::update() {
 }
 
 // TODO add constructor etc
-PausePanel::PausePanel(NhdDisplay* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** run_panel_ptr) :
+PausePanel::PausePanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** run_panel_ptr) :
   Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr},
   _apply_panel_d_ptr(apply_panel_ptr), 
   _run_panel_d_ptr(run_panel_ptr) {
