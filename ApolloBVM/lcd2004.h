@@ -45,6 +45,7 @@ class Lcd2004 {
 
     byte _row;
     byte _col;
+
     LiquidCrystal* _lcd;
 
 
