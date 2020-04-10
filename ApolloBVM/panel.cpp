@@ -21,13 +21,19 @@ void SplashPanel::start() {
 
   // Clear display.
   _disp_ptr->clearDisplay();
-  //_disp_ptr->print("hi");
 
+  //_disp_ptr->print("hi");
+  //_disp_ptr->setCursor(0,0);
+  //_disp_ptr->print("Apollo");
   // Display each line.
+  
   for (int i = 0; i < 4; i++) {
     _disp_ptr->setCursor(0, i);
+        //_disp_ptr->print("Apollo");
     _disp_ptr->print(*(_text+i));
   }
+  
+  
 }
 
 Panel* SplashPanel::update() {
@@ -84,6 +90,7 @@ void EditPanel::start() {
 
   // Mark that the user hasn't made a change.
   _made_change = false;
+  
   
 }
 

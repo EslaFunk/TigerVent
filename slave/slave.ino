@@ -2,7 +2,7 @@
 #include <Servo.h>
 #include <trajfactory.h>
 
-#define SLAVE_ADDR 8
+#define SLAVE_ADDR 9
 #define SERVO_MIN 2400
 #define SERVO_MAX 550
 
@@ -23,7 +23,7 @@ char state;
 void setup() {
   Wire.begin(SLAVE_ADDR);                // join i2c bus with address #8
   Wire.onReceive(recieveTraj); // register event
-  Serial.begin(9600);           // start serial for output
+  //Serial.begin(9600);           // start serial for output
 
   // Attach servo
   servo.attach(9);
@@ -65,7 +65,7 @@ void loop() {
 }
 
 void moveTo(int pos, int delta_t){
-  Serial.println(SERVO_MIN-pos);
+  //Serial.println(SERVO_MIN-pos);
   servo.writeMicroseconds(SERVO_MIN-pos);
   delay(delta_t);
 }

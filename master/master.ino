@@ -32,11 +32,13 @@ void setup()
   Wire.begin();
 
   // Start serial debug connection.
-  Serial.begin(9600);
+  //Serial.begin(9600);
 
   // Start display.
   display.begin(9600);
   display.clearDisplay();
+  display.print("kevintest");
+
 
   // Init slash text.
   splash_text[0] = "";
@@ -49,6 +51,7 @@ void setup()
   warning_text[1] = "      USE ADULT ";
   warning_text[2] = "        SIZED";
   warning_text[3] = "         BVM ";
+
 
   // Init panels.
   start_ptr = new EditPanel(&display, &enc, &encoder_button, &stop_button, &vs, "Confirm & Run?", &run_ptr, 0);
@@ -68,7 +71,10 @@ void setup()
 }
 
 void loop()
+
+
 {
+
   // Poll button status.
   encoder_button.poll();
   stop_button.poll();
@@ -116,7 +122,7 @@ void transmit() {
 
   // Send i2c message.
   Wire.endTransmission();
-`
+
   // Sent settings so disable send.
   vs.send = false;
 
