@@ -69,6 +69,7 @@ void setup()
   warning_text[3] = "";
 
 
+
   // Init panels.
   start_ptr = new EditPanel(&display, &enc, &encoder_button, &stop_button, &vs, &vl, "Confirm & Run?", &run_ptr, 0);
   warning_ptr = new SplashPanel(&display, &enc, &encoder_button, &stop_button, &vs, warning_text, 2000, &start_ptr);
