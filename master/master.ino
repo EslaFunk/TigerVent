@@ -57,10 +57,10 @@ void setup()
 
 
   // Init slash text.
-  splash_text[0] = "";
-  splash_text[1] = "     ApolloBVM";
-  splash_text[2] = "";
-  splash_text[3] = "";
+  splash_text[0] = "    LSU TigerVent   ";
+  splash_text[1] = " ";
+  splash_text[2] = "    inspired by";
+  splash_text[3] = "     ApolloBVM";
 
   //Init warning text.
   warning_text[0] = "      WARNING: ";
