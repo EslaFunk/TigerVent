@@ -6,7 +6,7 @@ Lcd2004::Lcd2004(byte pin) :
                              _row(0),
                              _col(0)
 {
-  _lcd = new LiquidCrystal(8, 9, 10, 4, 12, 13);
+  _lcd = new LiquidCrystal(8, 9, 10, 0, 12, 13);
   //_serial_ptr = new SoftwareSerial(2, pin);
 }
 
