@@ -4,7 +4,7 @@
 # Ignore VIM temp files
 *.swp
 *.swo
-
+arduino.json
 .vscode/arduino.json
 .vscode/arduino.json
 .gitignore
