@@ -291,6 +291,7 @@ Panel* RunningPanel::update() {
   if (_stop_button_ptr->getButtonState()) {
     return _stop_panel_ptr; 
   }
+  
 
   // Check if encoder button pushed and return apply panel if pushed.
   if (_em_button_ptr->getButtonState()) {

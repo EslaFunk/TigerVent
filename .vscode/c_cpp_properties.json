@@ -7,7 +7,8 @@
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\**",
                 "${workspaceFolder}/**",
                 "${workspaceFolder}\\ApolloBVM\\**",
-                "C:\\Users\\ProtoLAB\\Documents\\Coronavirus Response\\apollobvm\\ApolloBVM\\**"
+                "C:\\Users\\ProtoLAB\\Documents\\Coronavirus Response\\apollobvm\\ApolloBVM\\**",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino\\wiring_analog.c"
             ],
             "defines": [
                 "_DEBUG",

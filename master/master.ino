@@ -1,5 +1,7 @@
 #include "panel.h"
 #include "Wire.h"
+#include "Buzzer.h"
+#include "nscdrrn001pdunv.h"
 
 // Address of slave.
 #define SLAVE_ADDR 8
@@ -10,8 +12,17 @@
 #define ENC_DT_PIN 5
 #define ENC_BUTTON_PIN 7
 #define STOP_BUTTON_PIN 11
+#define PRESSURE_SENSOR_PIN A0
+#define BUZZER_PIN 2
+#define PRESSURE_CONVERSION_MULTIPLIER 0.169618
+#define PRESSURE_CONVERSTION_CONSTANT -71.3247129
+
+
+
 
 // Init peripherals.
+Buzzer buzzer(BUZZER_PIN);
+Nscdrrn001pdunv pressure_sensor(PRESSURE_SENSOR_PIN, PRESSURE_CONVERSION_MULTIPLIER, PRESSURE_CONVERSTION_CONSTANT);
 Lcd2004 display(DISPLAY_PIN);
 Encoder enc(ENC_DT_PIN, ENC_CLK_PIN);
 ButtonManager encoder_button(ENC_BUTTON_PIN, true);
@@ -53,8 +64,6 @@ void setup()
   // Start display.
   display.begin(9600);
   display.clearDisplay();
-  display.print("kevintest");
-
 
   // Init slash text.
   splash_text[0] = "    LSU TigerVent   ";
@@ -91,7 +100,11 @@ void loop()
 
 
 {
-
+  if(pressure_sensor.read() > 40){
+    while(1){
+    buzzer.alarmHigh();
+    }
+  }
   // Poll button status.
   encoder_button.poll();
   stop_button.poll();
