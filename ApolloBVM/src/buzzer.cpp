@@ -1,15 +1,14 @@
 #include "buzzer.h"
 #include "Arduino.h"
 #include "pins_arduino.h"
-Buzzer::Buzzer(byte pin) : _pin(pin)
-{
-    _alarmStatus = NoAlarm;
-}
+Buzzer::Buzzer(byte pin) : 
+    _pin(pin) {}
 void Buzzer::alarmHigh()
 {
     tone(_pin, 5000);
-    delay(100);
-    noTone(_pin);
+    delay(1000);
+
+
 }
 void Buzzer::alarmIncreasing()
 {
@@ -33,6 +32,10 @@ void Buzzer::alarmDecreasing()
     delay(25);
     tone(_pin, 5000);
     delay(25);
+    noTone(_pin);
+}
+
+void Buzzer::alarmStop(){
     noTone(_pin);
 }
 

@@ -247,11 +247,11 @@ Panel* EditPanel::update() {
   return 0;
 }
 
-RunningPanel::RunningPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr, Nscdrrn001pdunv* pressure_ptr, AlarmPanel* alarm_panel_ptr ) :
+RunningPanel::RunningPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr, Nscdrrn001pdunv* pressure_ptr, Panel** alarm_panel_ptr ) :
   Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr, pressure_ptr},
   _apply_panel_d_ptr(apply_panel_ptr), 
   _stop_panel_d_ptr(stop_panel_ptr),
-  _alarm_panel_ptr(alarm_panel_ptr) {}
+  _alarm_panel_d_ptr(alarm_panel_ptr) {}
 
 String RunningPanel::formatTime() {
   return _disp_ptr->zeroPad(_vs_ptr->hours) + ":" + _disp_ptr->zeroPad(_vs_ptr->minute) + ":" + _disp_ptr->zeroPad(_vs_ptr->seconds);
@@ -262,7 +262,7 @@ void RunningPanel::start() {
   // Dereference double pointer to panels.
   _apply_panel_ptr = *_apply_panel_d_ptr;  
   _stop_panel_ptr = *_stop_panel_d_ptr;
-  //_alarm_panel_ptr = *_alarm_panel_d_ptr;
+  _alarm_panel_ptr = *_alarm_panel_d_ptr;
 
   // Change mode to load new settings.
   _vs_ptr->mode = 'L';
@@ -286,14 +286,30 @@ void RunningPanel::start() {
   _disp_ptr->setCursor(1, 3);
   _disp_ptr->print(_i_e_text + _vs_ptr->inhale + ':' + _vs_ptr->exhale);
 
-  _disp_ptr->setCursor(10,3);
+  _disp_ptr->setCursor(10,2);
   _disp_ptr->print("P:  cmH20");
+
+  _disp_ptr->setCursor(10,3);
+  switch(_vs_ptr->operatingMode){
+    case VolumeControl:{
+      _disp_ptr->print("MODE=VS");
+      break;
+    }
+    case AssistControl:{
+      _disp_ptr->print("MODE=AC");
+      break;
+    }
+    case SynchronizedIntermittentMandatoryVentilation:{
+      _disp_ptr->print("MODE=SIMV");
+    }
+  }
+  
 }
 
 Panel* RunningPanel::update() {
   if(_pressure_ptr->read() > 40){
-    _apply_panel_ptr->setAlarmType(HighPressureAlarm);
-    return _alarm_panel_ptr;
+    _vs_ptr->alarm_type = HighPressureAlarm;
+    return  _alarm_panel_ptr;
   }
   // Check if stop button pushed and return stop panel if pushed.
   if (_stop_button_ptr->getButtonState()) {
@@ -333,7 +349,7 @@ Panel* RunningPanel::update() {
   }
   //update pressure every 0.1 seconds
   if (!(millis() % 200)){ 
-    _disp_ptr->setCursor(_text_length_to_pressure,3);
+    _disp_ptr->setCursor(_text_length_to_pressure,2);
     _disp_ptr->print(_disp_ptr->zeroPad(_pressure_ptr->read()));
   }
   return 0;
@@ -428,18 +444,19 @@ Panel* PausePanel::update() {
 }
 
 
-AlarmPanel::AlarmPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** next_ptr, , Buzzer * buzzer_ptr ) :
+AlarmPanel::AlarmPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** next_ptr, Buzzer * buzzer_ptr ) :
   Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr, nullptr},
   _next_d_ptr(next_ptr),
   _buzzer_ptr(buzzer_ptr) {}
 
 void AlarmPanel::start() {
-
+    _alarm_type = _vs_ptr->alarm_type;
   // Dereference double pointer to panel.
   _next_ptr = *_next_d_ptr;
 
   // Clear display.
   _disp_ptr->clearDisplay();
+
 
     //Init alarm text.
   _text[0] = "      ALARM: ";
@@ -449,7 +466,6 @@ void AlarmPanel::start() {
 
   for (int i = 0; i < 4; i++) {
     _disp_ptr->setCursor(0, i);
-        //_disp_ptr->print("Apollo");
     _disp_ptr->print(*(_text+i));
   }
 
@@ -460,19 +476,18 @@ void AlarmPanel::start() {
 }
 
 Panel* AlarmPanel::update() {
-    if (_stop_button_ptr->getButtonState()) {
+  
+  if (_stop_button_ptr->getButtonState() || _em_button_ptr->getButtonState()) {
+    //_buzzer_ptr->alarmStop();
     return _next_ptr; 
   }
 
-  // Check if encoder button pushed and return apply panel if pushed.
-  if (_em_button_ptr->getButtonState()) {
-    return _next_ptr;
-  }
-
+  
+ 
   //sound buzzer based on alarm type
-  switch (_alarmType){
+  switch (_alarm_type){
     case HighPressureAlarm:{
-      _buzzer_ptr->alarmIncreasing();
+      _buzzer_ptr->alarmHigh();
       break;
     }
     case LowPressureAlarm:{
@@ -480,9 +495,11 @@ Panel* AlarmPanel::update() {
       break;
     }
   }
+  
+ return 0;
 
 }
 
-void AlarmPanel::setAlarmType(AlarmType alarmtype){
-  _alarmType = alarmType;
+void AlarmPanel::setAlarmType(AlarmType alarm_type){
+  _alarm_type = alarm_type;
 } 

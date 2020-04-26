@@ -1,6 +1,9 @@
 #ifndef ventsettings_h
 #define ventsettings_h
 
+enum AlarmType {NoAlarm, HighPressureAlarm, LowPressureAlarm};
+enum OperatingMode {VolumeControl, AssistControl, SynchronizedIntermittentMandatoryVentilation}; 
+
 typedef struct  {
 
   // Current slave mode.
@@ -24,6 +27,10 @@ typedef struct  {
 
   // Boolean to indicate to send settings.
   bool send;
+
+  AlarmType alarm_type;
+
+  OperatingMode operatingMode;
 
 } VentSettings;
 

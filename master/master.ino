@@ -1,6 +1,6 @@
 #include "panel.h"
 #include "Wire.h"
-#include "buzzeralarmmanager.h"
+#include "buzzer.h"
 #include "nscdrrn001pdunv.h"
 
 // Address of slave.
@@ -27,7 +27,7 @@ ButtonManager encoder_button(ENC_BUTTON_PIN, true);
 ButtonManager stop_button(STOP_BUTTON_PIN, false);
 
 // Default settings.
-VentSettings vs = {'X', 500, 12, 1, 3, 0, 00, 20, 0, 0, 0, false}; 
+VentSettings vs = {'X', 500, 12, 1, 3, 0, 00, 20, 0, 0, 0, false, NoAlarm, VolumeControl}; 
 
 // Default limits.
 VentLimits vl;
@@ -88,9 +88,9 @@ void setup()
   start_ptr = new EditPanel(&display, &enc, &encoder_button, &stop_button, &vs, &vl, "Confirm & Run?", &run_ptr, 0);
   warning_ptr = new SplashPanel(&display, &enc, &encoder_button, &stop_button, &vs, warning_text, 2000, &start_ptr);
   splash_ptr = new SplashPanel(&display, &enc, &encoder_button, &stop_button, &vs, splash_text, 2000, &warning_ptr);
-  alarm_ptr = new AlarmPanel(&display, &enc, &encoder_button, &stop_button, &vs, &pause_ptr, &buzzer) :
+  alarm_ptr = new AlarmPanel(&display, &enc, &encoder_button, &stop_button, &vs, &pause_ptr, &buzzer);
   apply_ptr = new EditPanel(&display, &enc, &encoder_button, &stop_button, &vs, &vl, "Apply Changes?", &run_ptr, &pause_ptr);
-  run_ptr = new RunningPanel(&display, &enc, &encoder_button, &stop_button, &vs, &apply_ptr, &pause_ptr, &pressure_sensor, alarm_ptr );
+  run_ptr = new RunningPanel(&display, &enc, &encoder_button, &stop_button, &vs, &apply_ptr, &pause_ptr, &pressure_sensor, &alarm_ptr );
   pause_ptr = new PausePanel(&display, &enc, &encoder_button, &stop_button, &vs, &start_ptr, &run_ptr);
 
   // Delay just cause.
@@ -121,7 +121,12 @@ void loop()
 
   // If we get a new panel, start and switch to it.
   if (new_panel != 0) {
+
     cur_panel = new_panel;
+
+
+
+        //display.clearDisplay();
     cur_panel->start();
   }
 

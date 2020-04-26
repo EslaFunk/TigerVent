@@ -11,6 +11,7 @@ class Buzzer {
     void alarmHigh();
     void alarmIncreasing();
     void alarmDecreasing();
+    void alarmStop();
 
   private:
     byte _pin;
