@@ -1,15 +1,16 @@
 #include "panel.h"
 
 
-Panel::Panel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr) :
+Panel::Panel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Nscdrrn001pdunv* pressure_ptr) :
   _disp_ptr(disp_ptr),
   _encoder_ptr(encoder_ptr),
   _em_button_ptr(em_button_ptr),
   _stop_button_ptr(stop_button_ptr),
-  _vs_ptr(vs_ptr) {}
+  _vs_ptr(vs_ptr),
+  _pressure_ptr(pressure_ptr) {}
 
 SplashPanel::SplashPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String* text, int display_time, Panel** next_ptr) :
-  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr},
+  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr, nullptr},
   _next_d_ptr(next_ptr),
   _display_time(display_time),
   _text(text) {}
@@ -45,7 +46,7 @@ Panel* SplashPanel::update() {
 
 
 EditPanel::EditPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, VentLimits* vl_ptr, String top_text, Panel** run_panel_ptr, Panel** stop_panel_ptr) :
-  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr},
+  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr, nullptr},
   _top_text(top_text),
   _run_panel_d_ptr(run_panel_ptr),
   _vl_ptr(vl_ptr),
@@ -246,10 +247,11 @@ Panel* EditPanel::update() {
   return 0;
 }
 
-RunningPanel::RunningPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr) :
-  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr},
+RunningPanel::RunningPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr, Nscdrrn001pdunv* pressure_ptr, AlarmPanel* alarm_panel_ptr ) :
+  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr, pressure_ptr},
   _apply_panel_d_ptr(apply_panel_ptr), 
-  _stop_panel_d_ptr(stop_panel_ptr) {}
+  _stop_panel_d_ptr(stop_panel_ptr),
+  _alarm_panel_ptr(alarm_panel_ptr) {}
 
 String RunningPanel::formatTime() {
   return _disp_ptr->zeroPad(_vs_ptr->hours) + ":" + _disp_ptr->zeroPad(_vs_ptr->minute) + ":" + _disp_ptr->zeroPad(_vs_ptr->seconds);
@@ -260,11 +262,11 @@ void RunningPanel::start() {
   // Dereference double pointer to panels.
   _apply_panel_ptr = *_apply_panel_d_ptr;  
   _stop_panel_ptr = *_stop_panel_d_ptr;
+  //_alarm_panel_ptr = *_alarm_panel_d_ptr;
 
   // Change mode to load new settings.
   _vs_ptr->mode = 'L';
   _vs_ptr->send = true;
-
   // Clear display.
   _disp_ptr->clearDisplay();
 
@@ -283,15 +285,23 @@ void RunningPanel::start() {
   // Write fourth line and add default i:e ratio.
   _disp_ptr->setCursor(1, 3);
   _disp_ptr->print(_i_e_text + _vs_ptr->inhale + ':' + _vs_ptr->exhale);
+
+  _disp_ptr->setCursor(10,3);
+  _disp_ptr->print("P:  cmH20");
 }
 
 Panel* RunningPanel::update() {
-  
+  if(_pressure_ptr->read() > 40){
+    _apply_panel_ptr->setAlarmType(HighPressureAlarm);
+    return _alarm_panel_ptr;
+  }
   // Check if stop button pushed and return stop panel if pushed.
   if (_stop_button_ptr->getButtonState()) {
     return _stop_panel_ptr; 
   }
-  
+
+
+
 
   // Check if encoder button pushed and return apply panel if pushed.
   if (_em_button_ptr->getButtonState()) {
@@ -321,12 +331,17 @@ Panel* RunningPanel::update() {
     _disp_ptr->setCursor(_text_length_to_time + 1, 0);
     _disp_ptr->print(formatTime());
   }
+  //update pressure every 0.1 seconds
+  if (!(millis() % 200)){ 
+    _disp_ptr->setCursor(_text_length_to_pressure,3);
+    _disp_ptr->print(_disp_ptr->zeroPad(_pressure_ptr->read()));
+  }
   return 0;
 }
 
 // TODO add constructor etc
 PausePanel::PausePanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** run_panel_ptr) :
-  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr},
+  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr, nullptr},
   _apply_panel_d_ptr(apply_panel_ptr), 
   _run_panel_d_ptr(run_panel_ptr) {
     // Build new encoder manager with 2 selections.
@@ -411,3 +426,63 @@ Panel* PausePanel::update() {
   }
   return 0;
 }
+
+
+AlarmPanel::AlarmPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** next_ptr, , Buzzer * buzzer_ptr ) :
+  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr, nullptr},
+  _next_d_ptr(next_ptr),
+  _buzzer_ptr(buzzer_ptr) {}
+
+void AlarmPanel::start() {
+
+  // Dereference double pointer to panel.
+  _next_ptr = *_next_d_ptr;
+
+  // Clear display.
+  _disp_ptr->clearDisplay();
+
+    //Init alarm text.
+  _text[0] = "      ALARM: ";
+  _text[1] = "   OVER PRESSURE";
+  _text[2] = "   BAG VALVE MASK";
+  _text[3] = "";
+
+  for (int i = 0; i < 4; i++) {
+    _disp_ptr->setCursor(0, i);
+        //_disp_ptr->print("Apollo");
+    _disp_ptr->print(*(_text+i));
+  }
+
+  //stop operation
+  _vs_ptr->mode = 'X';
+  _vs_ptr->send = true;
+  
+}
+
+Panel* AlarmPanel::update() {
+    if (_stop_button_ptr->getButtonState()) {
+    return _next_ptr; 
+  }
+
+  // Check if encoder button pushed and return apply panel if pushed.
+  if (_em_button_ptr->getButtonState()) {
+    return _next_ptr;
+  }
+
+  //sound buzzer based on alarm type
+  switch (_alarmType){
+    case HighPressureAlarm:{
+      _buzzer_ptr->alarmIncreasing();
+      break;
+    }
+    case LowPressureAlarm:{
+      _buzzer_ptr->alarmDecreasing();
+      break;
+    }
+  }
+
+}
+
+void AlarmPanel::setAlarmType(AlarmType alarmtype){
+  _alarmType = alarmType;
+} 

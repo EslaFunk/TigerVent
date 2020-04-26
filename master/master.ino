@@ -1,6 +1,6 @@
 #include "panel.h"
 #include "Wire.h"
-#include "Buzzer.h"
+#include "buzzeralarmmanager.h"
 #include "nscdrrn001pdunv.h"
 
 // Address of slave.
@@ -18,10 +18,8 @@
 #define PRESSURE_CONVERSTION_CONSTANT -71.3247129
 
 
-
-
-// Init peripherals.
 Buzzer buzzer(BUZZER_PIN);
+// Init peripherals.
 Nscdrrn001pdunv pressure_sensor(PRESSURE_SENSOR_PIN, PRESSURE_CONVERSION_MULTIPLIER, PRESSURE_CONVERSTION_CONSTANT);
 Lcd2004 display(DISPLAY_PIN);
 Encoder enc(ENC_DT_PIN, ENC_CLK_PIN);
@@ -40,10 +38,12 @@ int cal[9] = {950, 1062, 1155, 1238, 1320, 1393, 1465, 1538, 1610};
 // String params for splash screens.
 String* splash_text = new String[4];
 String* warning_text = new String[4];
+String* alarm_text = new String[4];
 
 // Init panel pointers.
 SplashPanel* splash_ptr;
 SplashPanel* warning_ptr;
+AlarmPanel* alarm_ptr;
 EditPanel* start_ptr;
 EditPanel* apply_ptr;
 RunningPanel* run_ptr;
@@ -77,14 +77,20 @@ void setup()
   warning_text[2] = "   BAG VALVE MASK";
   warning_text[3] = "";
 
+  //Init alarm text.
+  alarm_text[0] = "      ALARM: ";
+  alarm_text[1] = "   OVER PRESSURE";
+  alarm_text[2] = "   BAG VALVE MASK";
+  alarm_text[3] = "";
 
 
   // Init panels.
   start_ptr = new EditPanel(&display, &enc, &encoder_button, &stop_button, &vs, &vl, "Confirm & Run?", &run_ptr, 0);
   warning_ptr = new SplashPanel(&display, &enc, &encoder_button, &stop_button, &vs, warning_text, 2000, &start_ptr);
   splash_ptr = new SplashPanel(&display, &enc, &encoder_button, &stop_button, &vs, splash_text, 2000, &warning_ptr);
+  alarm_ptr = new AlarmPanel(&display, &enc, &encoder_button, &stop_button, &vs, &pause_ptr, &buzzer) :
   apply_ptr = new EditPanel(&display, &enc, &encoder_button, &stop_button, &vs, &vl, "Apply Changes?", &run_ptr, &pause_ptr);
-  run_ptr = new RunningPanel(&display, &enc, &encoder_button, &stop_button, &vs, &apply_ptr, &pause_ptr);
+  run_ptr = new RunningPanel(&display, &enc, &encoder_button, &stop_button, &vs, &apply_ptr, &pause_ptr, &pressure_sensor, alarm_ptr );
   pause_ptr = new PausePanel(&display, &enc, &encoder_button, &stop_button, &vs, &start_ptr, &run_ptr);
 
   // Delay just cause.
@@ -97,14 +103,15 @@ void setup()
 }
 
 void loop()
-
-
 {
-  if(pressure_sensor.read() > 40){
-    while(1){
-    buzzer.alarmHigh();
-    }
-  }
+
+  // //if an alarm is on, continue
+  // alarmManager.update();
+    
+  // }
+  // if(pressure_sensor.read() > 40){
+  //   alarm = HighPressureAlarm;
+  // }
   // Poll button status.
   encoder_button.poll();
   stop_button.poll();

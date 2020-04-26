@@ -13,8 +13,8 @@ class Nscdrrn001pdunv {
   public:
     Nscdrrn001pdunv(uint8_t pin, float pressure_conversion_multiplier, float pressure_conversion_constant );
 
-    float read();
-    float convertToPressure(int input);
+    int read();
+    int convertToPressure(int input);
 
 
   private:

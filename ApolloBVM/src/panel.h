@@ -4,6 +4,8 @@
 #include "buttonmanager.h"
 #include "encodermanager.h"
 #include "lcd2004.h"
+#include "nscdrrn001pdunv.h"
+#include "buzzer.h"
 //#include "nhd_0420d3z.h"
 #include "ventsettings.h"
 #include "Encoder.h"
@@ -11,7 +13,7 @@
 class Panel {
   public:
 
-    Panel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr);
+    Panel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Nscdrrn001pdunv* pressure_ptr);
 
     // Virtual methods for each panel to inherit.
     virtual void start() = 0;
@@ -22,6 +24,8 @@ class Panel {
 
     // Pointers for settings and input.
     Lcd2004* _disp_ptr;
+    Nscdrrn001pdunv* _pressure_ptr;
+    //BuzzerAlarmManager* _alarm_manager_ptr;
 
     Encoder* _encoder_ptr;
     ButtonManager* _em_button_ptr;
@@ -55,6 +59,28 @@ class SplashPanel : public Panel {
 
 };
 
+enum AlarmType {HighPressureAlarm, LowPressureAlarm, NoAlarm};
+
+class AlarmPanel : public Panel {
+  public:
+    AlarmPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String* text, Panel** next_ptr, Buzzer * buzzer_ptr);
+
+    // Panel to display splash text for a specified amout of time.
+    void start();
+    Panel* update();
+    void setAlarmType(AlarmType alarmType);
+
+  private:
+    // Pointer to 4 element string array with text to display.
+    String* _text  = new String[4];
+    Buzzer * _buzzer_ptr;
+    AlarmType _alarmType = NoAlarm;
+    // Pointer and double pointer to next panel.
+    Panel** _next_d_ptr;
+    Panel* _next_ptr;
+
+};
+
 class EditPanel : public Panel {
   public:
     EditPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, VentLimits* vl_ptr, String top_text, Panel** run_panel_ptr, Panel** stop_panel_ptr);
@@ -73,18 +99,18 @@ class EditPanel : public Panel {
     String _top_text;
     
     // Text to show for tidal volume.
-    String _tv_text = "TV = ";
-    int _tv_text_length = 5;
-    String _tv_units = " mL";
+    String _tv_text = "TV:";
+    int _tv_text_length = 3;
+    String _tv_units = "mL";
 
     // Text to show for respiratory rate.
-    String _rr_text = "RR = ";
-    int _rr_text_length = 5;
-    String _rr_units = " BPM";
+    String _rr_text = "RR:";
+    int _rr_text_length = 3;
+    String _rr_units = "BPM";
 
     // Text to show for I:E ratio.
-    String _i_e_text = "I:E = ";
-    int _i_e_text_length = 8;
+    String _i_e_text = "I/E:";
+    int _i_e_text_length = 6;
 
     // Pointers to other panels.
     Panel** _run_panel_d_ptr;
@@ -110,7 +136,7 @@ class EditPanel : public Panel {
 
 class RunningPanel : public Panel {
   public:
-    RunningPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr);
+    RunningPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr, Nscdrrn001pdunv* pressure_ptr, AlarmPanel* alarm_panel_ptr);
 
     // Panel to display current time counter and current settings.
     void start();
@@ -123,23 +149,26 @@ class RunningPanel : public Panel {
     // Pointers to other panels.
     Panel** _apply_panel_d_ptr;
     Panel** _stop_panel_d_ptr;
+    //Panel** _alarm_panel_d_ptr;
     Panel* _apply_panel_ptr;
     Panel* _stop_panel_ptr;
-
+    AlarmPanel* _alarm_panel_ptr;
     // String for the top line of text.
     String _top_text = "Run Time: ";
     int _text_length_to_time = 10;
 
     // Text to show for tidal volume.
-    String _tv_text = "TV = ";
-    String _tv_units = " mL";
+    String _tv_text = "TV:";
+    String _tv_units = "mL";
 
     // Text to show for respiratory rate.
-    String _rr_text = "RR = ";
-    String _rr_units = " BPM";
+    String _rr_text = "RR:";
+    String _rr_units = "BPM";
 
     // Text to show for I:E ratio.
-    String _i_e_text = "I:E = ";
+    String _i_e_text = "I/E:";
+
+    int _text_length_to_pressure = 12;
 };
 
 class PausePanel : public Panel {
@@ -181,4 +210,6 @@ class PausePanel : public Panel {
     // Current selection of whether to run or edit.
     int _selection = 0;
 };
+
+
 #endif

@@ -9,14 +9,11 @@ class Buzzer {
     Buzzer(byte pin);
     
     void alarmHigh();
-    void alarmLowPressure();
-    void alarmHighPressure();
-
+    void alarmIncreasing();
+    void alarmDecreasing();
 
   private:
     byte _pin;
-
-
 
 };
 
