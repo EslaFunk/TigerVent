@@ -4,6 +4,7 @@
 enum AlarmType {NoAlarm, HighPressureAlarm, LowPressureAlarm};
 enum OperatingMode {VolumeControl, AssistControl, SynchronizedIntermittentMandatoryVentilation}; 
 
+
 typedef struct  {
 
   // Current slave mode.
@@ -50,4 +51,5 @@ typedef struct {
   int delta_exhale = 1;
 
 } VentLimits;
+
 #endif

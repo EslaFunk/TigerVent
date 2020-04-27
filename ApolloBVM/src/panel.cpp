@@ -52,7 +52,7 @@ EditPanel::EditPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_
   _vl_ptr(vl_ptr),
   _stop_panel_d_ptr(stop_panel_ptr) {
     // Build new encoder manager with 4 selections.
-    _em_ptr = new EncoderManager(encoder_ptr, 4);
+    _em_ptr = new EncoderManager(encoder_ptr, 5);
   }
 
 void EditPanel::start() {
@@ -90,6 +90,9 @@ void EditPanel::start() {
   // Write fourth line and add default i:e ratio.
   _disp_ptr->setCursor(1, 3);
   _disp_ptr->print(_i_e_text + _vs_ptr->inhale + ':' + _vs_ptr->exhale);
+
+  _disp_ptr->setCursor(10,3);
+
 
   // Mark that the user hasn't made a change.
   _made_change = false;
@@ -158,10 +161,13 @@ Panel* EditPanel::update() {
     _em_ptr->setSelection(starting_selection);
     _old_selection = starting_selection;
 
-    // Move cursor to over the arrow for the row.
-    _disp_ptr->setCursor(0, _row);
-    
-  
+    // Move cursor to over the arrow for the row if one of first 4 options
+    if(_row < 4){
+      _disp_ptr->setCursor(0, _row);
+    }else{
+    //go to 5th option (_row = 4)
+      _disp_ptr->setCursor(0, _row);
+    }
   // If we are in edit mode and the button was not pushed, encoder movement changes value.
   } else if (_edit && !_em_button_ptr->getButtonState()) {
 
@@ -290,19 +296,8 @@ void RunningPanel::start() {
   _disp_ptr->print("P:  cmH20");
 
   _disp_ptr->setCursor(10,3);
-  switch(_vs_ptr->operatingMode){
-    case VolumeControl:{
-      _disp_ptr->print("MODE=VS");
-      break;
-    }
-    case AssistControl:{
-      _disp_ptr->print("MODE=AC");
-      break;
-    }
-    case SynchronizedIntermittentMandatoryVentilation:{
-      _disp_ptr->print("MODE=SIMV");
-    }
-  }
+
+  _disp_ptr->print("MODE=" + abbreviatedOperationMode(_vs_ptr->operatingMode));
   
 }
 
