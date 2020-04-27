@@ -1,5 +1,18 @@
 #include "panel.h"
 
+String abbreviatedOperationMode(OperatingMode operatingMode){
+  switch(operatingMode){
+    case VolumeControl:{
+      return "VC  ";
+    }
+    case AssistControl:{
+      return "AC  ";
+    }
+    case SynchronizedIntermittentMandatoryVentilation:{
+      return "SIMV";
+    }
+  }
+}
 
 Panel::Panel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Nscdrrn001pdunv* pressure_ptr) :
   _disp_ptr(disp_ptr),
@@ -51,7 +64,7 @@ EditPanel::EditPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_
   _run_panel_d_ptr(run_panel_ptr),
   _vl_ptr(vl_ptr),
   _stop_panel_d_ptr(stop_panel_ptr) {
-    // Build new encoder manager with 4 selections.
+    // Build new encoder manager with 5 selections.
     _em_ptr = new EncoderManager(encoder_ptr, 5);
   }
 
@@ -92,6 +105,7 @@ void EditPanel::start() {
   _disp_ptr->print(_i_e_text + _vs_ptr->inhale + ':' + _vs_ptr->exhale);
 
   _disp_ptr->setCursor(10,3);
+  _disp_ptr->print("MODE=" + abbreviatedOperationMode(_vs_ptr->operatingMode));
 
 
   // Mark that the user hasn't made a change.
@@ -154,6 +168,9 @@ Panel* EditPanel::update() {
         num_selections = (_vl_ptr->max_exhale - _vl_ptr->min_exhale) / _vl_ptr->delta_exhale + 1;
         starting_selection = (_vs_ptr->exhale - _vl_ptr->min_exhale) / _vl_ptr->delta_exhale;
         break;
+      case 4:
+        num_selections = 3;
+        starting_selection = 0;
     }
 
     // Update settings to encoder manager.
@@ -166,7 +183,7 @@ Panel* EditPanel::update() {
       _disp_ptr->setCursor(0, _row);
     }else{
     //go to 5th option (_row = 4)
-      _disp_ptr->setCursor(0, _row);
+      _disp_ptr->setCursor(9,3);
     }
   // If we are in edit mode and the button was not pushed, encoder movement changes value.
   } else if (_edit && !_em_button_ptr->getButtonState()) {
@@ -209,10 +226,19 @@ Panel* EditPanel::update() {
           _disp_ptr->setCursor(1 + _i_e_text_length, 3);
           _disp_ptr->print(_vs_ptr->exhale);
           break;
+        case 4:
+              _vs_ptr->operatingMode = _em_ptr->getSelection();
+              _disp_ptr->setCursor(15,3);
+              _disp_ptr->print(abbreviatedOperationMode(_em_ptr->getSelection()));
+
       }
 
       // Set cursor back to row so blinking continues.
+      if(_row < 4){
       _disp_ptr->setCursor(0,_row);
+      } else{
+        _disp_ptr->setCursor(9,3);
+      }
 
       // Set old selection to the selection from this cycle.
       _old_selection = _em_ptr->getSelection();
@@ -228,7 +254,7 @@ Panel* EditPanel::update() {
     _disp_ptr->blinkingOff();
 
     // Set encoder manager back to 4 selections and to the row.
-    _em_ptr->setNumOptions(4);
+    _em_ptr->setNumOptions(5);
     _em_ptr->setSelection(_row);
 
   // If we are not in edit mode and the button was not pushed, move cursoe.
@@ -238,11 +264,19 @@ Panel* EditPanel::update() {
     if (_em_ptr->getSelection() != _row) {
 
       // Remove old cursor on the display.
-      _disp_ptr->setCursor(0, _row);
+      if(_row < 4){
+        _disp_ptr->setCursor(0, _row);
+      }
+      else{
+        _disp_ptr->setCursor(9,3);
+      }
       _disp_ptr->remove();
-
       // Write the new cursor on the display.
-      _disp_ptr->setCursor(0,_em_ptr->getSelection());
+      if(_em_ptr->getSelection() < 4){
+        _disp_ptr->setCursor(0,_em_ptr->getSelection());
+      }else{
+        _disp_ptr->setCursor(9,3);
+      }
       _disp_ptr->print(">");
 
       // Set the old row to the current row.
@@ -302,6 +336,10 @@ void RunningPanel::start() {
 }
 
 Panel* RunningPanel::update() {
+  if((_vs_ptr->operatingMode == AssistControl) && _pressure_ptr->read() < 4){
+    _vs_ptr->mode = 'K';
+    _vs_ptr->send = true;
+  }
   if(_pressure_ptr->read() > 40){
     _vs_ptr->alarm_type = HighPressureAlarm;
     return  _alarm_panel_ptr;
