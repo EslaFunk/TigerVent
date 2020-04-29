@@ -171,6 +171,7 @@ class RunningPanel : public Panel {
     String _i_e_text = "I:E=";
 
     int _text_length_to_pressure = 12;
+    int _ac_timer;
 };
 
 class PausePanel : public Panel {

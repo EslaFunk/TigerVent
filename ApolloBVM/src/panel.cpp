@@ -304,6 +304,7 @@ void RunningPanel::start() {
   _stop_panel_ptr = *_stop_panel_d_ptr;
   _alarm_panel_ptr = *_alarm_panel_d_ptr;
 
+  _ac_timer = 0;
   // Change mode to load new settings.
   _vs_ptr->mode = 'L';
   _vs_ptr->send = true;
@@ -336,8 +337,20 @@ void RunningPanel::start() {
 }
 
 Panel* RunningPanel::update() {
-  if((_vs_ptr->operatingMode == AssistControl) && _pressure_ptr->read() < 4){
-    _vs_ptr->mode = 'K';
+  _disp_ptr->setCursor(_text_length_to_pressure,1);
+  _disp_ptr->print(_ac_timer);
+
+
+  if(_vs_ptr->mode == 'A'){
+    _vs_ptr->mode == 'O';
+    _vs_ptr->send = false;
+  }
+  if((!(millis() % 1000)) && (_ac_timer > 0)){
+    _ac_timer--;
+  }
+  if((_vs_ptr->operatingMode == AssistControl) && (_pressure_ptr->read() < 0) && (_ac_timer == 0)){
+    _ac_timer = _vs_ptr->inhale;
+    _vs_ptr->mode = 'A';
     _vs_ptr->send = true;
   }
   if(_pressure_ptr->read() > 40){

@@ -38,3 +38,4 @@ int Trajectory::getCurrentStep() {
 int Trajectory::getDeltaTime() {
   return _delta_t;
 }
+
