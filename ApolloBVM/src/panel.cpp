@@ -1,15 +1,29 @@
 #include "panel.h"
 
+String abbreviatedOperationMode(OperatingMode operatingMode){
+  switch(operatingMode){
+    case VolumeControl:{
+      return "VC  ";
+    }
+    case AssistControl:{
+      return "AC  ";
+    }
+    case SynchronizedIntermittentMandatoryVentilation:{
+      return "SIMV";
+    }
+  }
+}
 
-Panel::Panel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr) :
+Panel::Panel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Nscdrrn001pdunv* pressure_ptr) :
   _disp_ptr(disp_ptr),
   _encoder_ptr(encoder_ptr),
   _em_button_ptr(em_button_ptr),
   _stop_button_ptr(stop_button_ptr),
-  _vs_ptr(vs_ptr) {}
+  _vs_ptr(vs_ptr),
+  _pressure_ptr(pressure_ptr) {}
 
 SplashPanel::SplashPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, String* text, int display_time, Panel** next_ptr) :
-  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr},
+  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr, nullptr},
   _next_d_ptr(next_ptr),
   _display_time(display_time),
   _text(text) {}
@@ -45,13 +59,13 @@ Panel* SplashPanel::update() {
 
 
 EditPanel::EditPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, VentLimits* vl_ptr, String top_text, Panel** run_panel_ptr, Panel** stop_panel_ptr) :
-  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr},
+  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr, nullptr},
   _top_text(top_text),
   _run_panel_d_ptr(run_panel_ptr),
   _vl_ptr(vl_ptr),
   _stop_panel_d_ptr(stop_panel_ptr) {
-    // Build new encoder manager with 4 selections.
-    _em_ptr = new EncoderManager(encoder_ptr, 4);
+    // Build new encoder manager with 5 selections.
+    _em_ptr = new EncoderManager(encoder_ptr, 5);
   }
 
 void EditPanel::start() {
@@ -89,6 +103,10 @@ void EditPanel::start() {
   // Write fourth line and add default i:e ratio.
   _disp_ptr->setCursor(1, 3);
   _disp_ptr->print(_i_e_text + _vs_ptr->inhale + ':' + _vs_ptr->exhale);
+
+  _disp_ptr->setCursor(10,3);
+  _disp_ptr->print("MODE=" + abbreviatedOperationMode(_vs_ptr->operatingMode));
+
 
   // Mark that the user hasn't made a change.
   _made_change = false;
@@ -150,6 +168,9 @@ Panel* EditPanel::update() {
         num_selections = (_vl_ptr->max_exhale - _vl_ptr->min_exhale) / _vl_ptr->delta_exhale + 1;
         starting_selection = (_vs_ptr->exhale - _vl_ptr->min_exhale) / _vl_ptr->delta_exhale;
         break;
+      case 4:
+        num_selections = 3;
+        starting_selection = 0;
     }
 
     // Update settings to encoder manager.
@@ -157,10 +178,13 @@ Panel* EditPanel::update() {
     _em_ptr->setSelection(starting_selection);
     _old_selection = starting_selection;
 
-    // Move cursor to over the arrow for the row.
-    _disp_ptr->setCursor(0, _row);
-    
-  
+    // Move cursor to over the arrow for the row if one of first 4 options
+    if(_row < 4){
+      _disp_ptr->setCursor(0, _row);
+    }else{
+    //go to 5th option (_row = 4)
+      _disp_ptr->setCursor(9,3);
+    }
   // If we are in edit mode and the button was not pushed, encoder movement changes value.
   } else if (_edit && !_em_button_ptr->getButtonState()) {
 
@@ -202,10 +226,19 @@ Panel* EditPanel::update() {
           _disp_ptr->setCursor(1 + _i_e_text_length, 3);
           _disp_ptr->print(_vs_ptr->exhale);
           break;
+        case 4:
+              _vs_ptr->operatingMode = _em_ptr->getSelection();
+              _disp_ptr->setCursor(15,3);
+              _disp_ptr->print(abbreviatedOperationMode(_em_ptr->getSelection()));
+
       }
 
       // Set cursor back to row so blinking continues.
+      if(_row < 4){
       _disp_ptr->setCursor(0,_row);
+      } else{
+        _disp_ptr->setCursor(9,3);
+      }
 
       // Set old selection to the selection from this cycle.
       _old_selection = _em_ptr->getSelection();
@@ -221,7 +254,7 @@ Panel* EditPanel::update() {
     _disp_ptr->blinkingOff();
 
     // Set encoder manager back to 4 selections and to the row.
-    _em_ptr->setNumOptions(4);
+    _em_ptr->setNumOptions(5);
     _em_ptr->setSelection(_row);
 
   // If we are not in edit mode and the button was not pushed, move cursoe.
@@ -231,11 +264,19 @@ Panel* EditPanel::update() {
     if (_em_ptr->getSelection() != _row) {
 
       // Remove old cursor on the display.
-      _disp_ptr->setCursor(0, _row);
+      if(_row < 4){
+        _disp_ptr->setCursor(0, _row);
+      }
+      else{
+        _disp_ptr->setCursor(9,3);
+      }
       _disp_ptr->remove();
-
       // Write the new cursor on the display.
-      _disp_ptr->setCursor(0,_em_ptr->getSelection());
+      if(_em_ptr->getSelection() < 4){
+        _disp_ptr->setCursor(0,_em_ptr->getSelection());
+      }else{
+        _disp_ptr->setCursor(9,3);
+      }
       _disp_ptr->print(">");
 
       // Set the old row to the current row.
@@ -246,10 +287,11 @@ Panel* EditPanel::update() {
   return 0;
 }
 
-RunningPanel::RunningPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr) :
-  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr},
+RunningPanel::RunningPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** stop_panel_ptr, Nscdrrn001pdunv* pressure_ptr, Panel** alarm_panel_ptr ) :
+  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr, pressure_ptr},
   _apply_panel_d_ptr(apply_panel_ptr), 
-  _stop_panel_d_ptr(stop_panel_ptr) {}
+  _stop_panel_d_ptr(stop_panel_ptr),
+  _alarm_panel_d_ptr(alarm_panel_ptr) {}
 
 String RunningPanel::formatTime() {
   return _disp_ptr->zeroPad(_vs_ptr->hours) + ":" + _disp_ptr->zeroPad(_vs_ptr->minute) + ":" + _disp_ptr->zeroPad(_vs_ptr->seconds);
@@ -260,11 +302,12 @@ void RunningPanel::start() {
   // Dereference double pointer to panels.
   _apply_panel_ptr = *_apply_panel_d_ptr;  
   _stop_panel_ptr = *_stop_panel_d_ptr;
+  _alarm_panel_ptr = *_alarm_panel_d_ptr;
 
+  _ac_timer = 0;
   // Change mode to load new settings.
   _vs_ptr->mode = 'L';
   _vs_ptr->send = true;
-
   // Clear display.
   _disp_ptr->clearDisplay();
 
@@ -283,15 +326,44 @@ void RunningPanel::start() {
   // Write fourth line and add default i:e ratio.
   _disp_ptr->setCursor(1, 3);
   _disp_ptr->print(_i_e_text + _vs_ptr->inhale + ':' + _vs_ptr->exhale);
+
+  _disp_ptr->setCursor(10,2);
+  _disp_ptr->print("P:  cmH20");
+
+  _disp_ptr->setCursor(10,3);
+
+  _disp_ptr->print("MODE=" + abbreviatedOperationMode(_vs_ptr->operatingMode));
+  
 }
 
 Panel* RunningPanel::update() {
-  
+  _disp_ptr->setCursor(_text_length_to_pressure,1);
+  _disp_ptr->print(_ac_timer);
+
+
+  if(_vs_ptr->mode == 'A'){
+    _vs_ptr->mode == 'O';
+    _vs_ptr->send = false;
+  }
+  if((!(millis() % 1000)) && (_ac_timer > 0)){
+    _ac_timer--;
+  }
+  if((_vs_ptr->operatingMode == AssistControl) && (_pressure_ptr->read() < 0) && (_ac_timer == 0)){
+    _ac_timer = _vs_ptr->inhale;
+    _vs_ptr->mode = 'A';
+    _vs_ptr->send = true;
+  }
+  if(_pressure_ptr->read() > 40){
+    _vs_ptr->alarm_type = HighPressureAlarm;
+    return  _alarm_panel_ptr;
+  }
   // Check if stop button pushed and return stop panel if pushed.
   if (_stop_button_ptr->getButtonState()) {
     return _stop_panel_ptr; 
   }
-  
+
+
+
 
   // Check if encoder button pushed and return apply panel if pushed.
   if (_em_button_ptr->getButtonState()) {
@@ -321,12 +393,17 @@ Panel* RunningPanel::update() {
     _disp_ptr->setCursor(_text_length_to_time + 1, 0);
     _disp_ptr->print(formatTime());
   }
+  //update pressure every 0.1 seconds
+  if (!(millis() % 200)){ 
+    _disp_ptr->setCursor(_text_length_to_pressure,2);
+    _disp_ptr->print(_disp_ptr->zeroPad(_pressure_ptr->read()));
+  }
   return 0;
 }
 
 // TODO add constructor etc
 PausePanel::PausePanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** apply_panel_ptr, Panel** run_panel_ptr) :
-  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr},
+  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr, nullptr},
   _apply_panel_d_ptr(apply_panel_ptr), 
   _run_panel_d_ptr(run_panel_ptr) {
     // Build new encoder manager with 2 selections.
@@ -411,3 +488,64 @@ Panel* PausePanel::update() {
   }
   return 0;
 }
+
+
+AlarmPanel::AlarmPanel(Lcd2004* disp_ptr, Encoder* encoder_ptr, ButtonManager* em_button_ptr, ButtonManager* stop_button_ptr, VentSettings* vs_ptr, Panel** next_ptr, Buzzer * buzzer_ptr ) :
+  Panel{disp_ptr, encoder_ptr, em_button_ptr, stop_button_ptr, vs_ptr, nullptr},
+  _next_d_ptr(next_ptr),
+  _buzzer_ptr(buzzer_ptr) {}
+
+void AlarmPanel::start() {
+    _alarm_type = _vs_ptr->alarm_type;
+  // Dereference double pointer to panel.
+  _next_ptr = *_next_d_ptr;
+
+  // Clear display.
+  _disp_ptr->clearDisplay();
+
+
+    //Init alarm text.
+  _text[0] = "      ALARM: ";
+  _text[1] = "   OVER PRESSURE";
+  _text[2] = "   BAG VALVE MASK";
+  _text[3] = "";
+
+  for (int i = 0; i < 4; i++) {
+    _disp_ptr->setCursor(0, i);
+    _disp_ptr->print(*(_text+i));
+  }
+
+  //stop operation
+  _vs_ptr->mode = 'X';
+  _vs_ptr->send = true;
+  
+}
+
+Panel* AlarmPanel::update() {
+  
+  if (_stop_button_ptr->getButtonState() || _em_button_ptr->getButtonState()) {
+    //_buzzer_ptr->alarmStop();
+    return _next_ptr; 
+  }
+
+  
+ 
+  //sound buzzer based on alarm type
+  switch (_alarm_type){
+    case HighPressureAlarm:{
+      _buzzer_ptr->alarmHigh();
+      break;
+    }
+    case LowPressureAlarm:{
+      _buzzer_ptr->alarmDecreasing();
+      break;
+    }
+  }
+  
+ return 0;
+
+}
+
+void AlarmPanel::setAlarmType(AlarmType alarm_type){
+  _alarm_type = alarm_type;
+} 

@@ -48,15 +48,23 @@ void setup() {
 void loop() {
   // Run device in different modes.
   switch (state) {
+    // immediate assist, push all the way with the current config, then continue as normal
+
+
+
     // Device is on, continue following trajectory.
+
     case 'O': 
       moveTo(traj_ptr->nextStep(), traj_ptr->getDeltaTime());
+      //delay(100);
       break;
+    
 
     // Device has been instructed to shutdown.
     case 'X':
       stop();
       break;
+
 
     // Device has recieved a new trajectory, load and start.
     case 'L':
@@ -75,6 +83,57 @@ void loop() {
       // Set device on.
       state = 'O';
       break;
+    
+    case 'A':
+        int cur_pos = traj_ptr->nextStep();
+                 // Serial.println("-------");
+        //Serial.println("cur_pos");
+        //Serial.println(cur_pos);
+        
+        int next_pos;
+        do{
+          next_pos = traj_ptr->nextStep();
+          //Serial.println("next_pos");
+          //Serial.println(next_pos);
+          //Serial.println("-------");
+        } while((next_pos < cur_pos));
+        moveTo(next_pos, traj_ptr->getDeltaTime());
+        /*
+      //skip all decreasing movements, get to the next push in movement
+        int cur_pos;
+        int next_pos = traj_ptr->nextStep();
+        do{
+          cur_pos = next_pos;
+          next_pos = traj_ptr->nextStep();
+        }while(cur_pos > next_pos);
+       */
+      //moveTo(SERVO_MIN+1, 1000);
+      state = 'O';
+      break;
+    //case 'A':
+      //stop();
+      //break;
+
+      /*
+      int cur_pos = traj_ptr->nextStep();
+      while(cur_pos > traj_ptr->nextStep() ){
+        cur_pos = traj_ptr->nextStep();
+      }
+            break;
+                  moveTo(traj_ptr->nextStep(), traj_ptr->getDeltaTime());
+                  */
+
+
+
+    
+    /*
+      //skip all decreasing movements, get to the next push in movement
+      int cur_pos = traj_ptr->nextStep();
+     while(cur_pos > traj_ptr->nextStep() ){
+        cur_pos = traj_ptr->nextStep();
+     }
+     state = 'O';
+     */
   }
 }
 
@@ -111,8 +170,12 @@ void recieveTraj(int num_entries) {
     case 'X':
       state = 'X';
       break;
+    case 'A':
+      state = 'A';
+      break;
     case 'L':
       state = 'L';
+
 
       // Load new params
       byte high = Wire.read();
