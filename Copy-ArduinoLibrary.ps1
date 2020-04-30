@@ -1,5 +1,5 @@
 ﻿param(
-    $fromPath = "C:\Users\ProtoLAB\Documents\Coronavirus Response\apollobvm\ApolloBVM",
+    $fromPath = "C:\Users\ProtoLAB\Documents\Coronavirus Response\tigervent\TigerVent",
     $toPath = "C:\Users\ProtoLAB\Documents\Arduino\libraries"
 )
 
