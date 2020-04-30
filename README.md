@@ -1,5 +1,5 @@
 # TigerVent #
-## A Ventilator design inspired by Rice University's ApolloBMV with added A
+## A Ventilator design inspired by Rice University's ApolloBMV with added Alarming and Pressure Sensing
 
 ![alt text][renderedpcb]
 
