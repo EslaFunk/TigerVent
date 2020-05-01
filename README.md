@@ -12,6 +12,7 @@ Custom Enhancements from base ApolloBMV Design:
 
 ![alt text][renderedpcb]
 
+WARNING: This product is not yet approved by any regulatory agency. Please consult with a medical professional prior to use, and use at your own risk.
 
 Special thanks to the team at Rice University for the base design. Hopefully these enhancements can provide more functionality and safety to others looking to implement these ventilators.
 
