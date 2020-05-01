@@ -4,7 +4,7 @@
 Custom Enhancements from base ApolloBMV Design:
 * Honeywell NSCDRRN001PDUNV Pressure Sensor integrated with driver (still available pressure sensor)
 * Assist control mode that triggers the ventilator when negative pressure (a breath) is initiated
-* Alarm and code to handle alarms based on pressure (WIP)
+* Alarm/Buzzer and code to handle alarms based on pressure (WIP)
 * Schematic and Board files for printed circuit board designed in EAGLE (confirmed tested and working)
 * updated CAD file of chassis to fit PCB and CAD file of PCB
 * alternate LCD driver implementation for more available 2004 LCD Screen
