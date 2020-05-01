@@ -523,12 +523,19 @@ void AlarmPanel::start() {
 
 Panel* AlarmPanel::update() {
   
-  if (_stop_button_ptr->getButtonState() || _em_button_ptr->getButtonState()) {
-    //_buzzer_ptr->alarmStop();
+  if (_em_button_ptr->getButtonState()) {
+        _alarm_type = NoAlarm;
+    _buzzer_ptr->alarmStop();
+
     return _next_ptr; 
   }
 
-  
+  if (_stop_button_ptr->getButtonState() ) {
+        _alarm_type = NoAlarm;
+    _buzzer_ptr->alarmStop();
+
+    return _next_ptr; 
+  }
  
   //sound buzzer based on alarm type
   switch (_alarm_type){

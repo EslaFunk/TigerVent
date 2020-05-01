@@ -6,8 +6,6 @@ Buzzer::Buzzer(byte pin) :
 void Buzzer::alarmHigh()
 {
     tone(_pin, 5000);
-    delay(1000);
-
 
 }
 void Buzzer::alarmIncreasing()
