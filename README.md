@@ -1,8 +1,8 @@
 # TigerVent #
 ## A Ventilator design inspired by Rice University's ApolloBMV with added Alarming and Pressure Sensing
 
-Enhancements from base ApolloBMV Design:
-* Honeywell NSCDRRN001PDUNV Pressure Sensor integrated with driver
+Custom Enhancements from base ApolloBMV Design:
+* Honeywell NSCDRRN001PDUNV Pressure Sensor integrated with driver (still available pressure sensor)
 * Assist control mode that triggers the ventilator when negative pressure (a breath) is initiated
 * Alarm and code to handle alarms based on pressure (WIP)
 * Schematic and Board files for printed circuit board designed in EAGLE (confirmed tested and working)
@@ -13,8 +13,7 @@ Enhancements from base ApolloBMV Design:
 ![alt text][renderedpcb]
 
 
-
-
+Special thanks to the team at Rice University for the base design. Hopefully these enhancements can provide more functionality and safety to others looking to implement these ventilators.
 
 
 
