@@ -11,7 +11,7 @@ Here is our plumbing connection configuration:
 
 ![alt text][plumbingconfig]
 
-We want the microcontroller to see the difference in pressure, or **Pressure Port 1 - Pressure Port 2**. This pressure sensor is an **unamplified** sensor, and outputs 0-~65mV differenat 5V input. 
+We want the microcontroller to see the difference in pressure, or **Pressure Port 1 - Pressure Port 2**. This pressure sensor is an **unamplified** sensor, and has a range of about ~65mV. In order to provide an input of ~0-5V analog voltage to the microcontroller, we had to manipulate this signal. We used the INA125 from TI to amplify the change in signal while maintaining its ~0-5V range.
 
 
 [pinout]: https://github.com/kebroad/TigerVent/blob/master/Tutorials/Pressure%20Sensor/images/pinout.JPG
