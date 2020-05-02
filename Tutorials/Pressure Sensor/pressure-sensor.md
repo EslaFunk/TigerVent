@@ -16,4 +16,4 @@ We want the microcontroller to see the difference in pressure, or **Pressure Por
 
 [pinout]: https://github.com/kebroad/TigerVent/blob/master/Tutorials/Pressure%20Sensor/images/pinout.JPG
 
-[plumbingconfig]: https://github.com/kebroad/TigerVent/blob/master/Tutorials/Pressure%20Sensor/images/pinout.JPG
+[plumbingconfig]: https://github.com/kebroad/TigerVent/blob/master/Tutorials/Pressure%20Sensor/images/plumbingconfig.jpg
