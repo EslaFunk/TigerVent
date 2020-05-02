@@ -17,12 +17,11 @@ There are 5 pins that need to be connected to the ATMega328 in order to program 
  * RX (green wire)
  * RESET (Blue wire)
 
-This was incorporated into the PCB design to allow in-board programming, after the microcontroller was placed into the socket. Here's an illustration of what it looks like:
+This was incorporated into the PCB design to allow in-board programming, after the microcontroller was placed into the socket. Here's an illustration of what it looks like on our schematic and board:
 
 ![alt text][pcbprogramming] ![alt text][actualboard]
 
-
-
+We used female sockets to program the chips on the fly. The IC on the left is the IC for the slave and the IC on the right is the master. For both, 5V and GND needs to be connected, but depending on which one you want to program, the other 3 wires should be in their respective connectors.
 
 
 
