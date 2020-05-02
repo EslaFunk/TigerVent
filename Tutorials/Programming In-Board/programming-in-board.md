@@ -30,4 +30,4 @@ All credit of Arduino images belongs to Arduino.
 [arduinobreadboard]: https://github.com/kebroad/TigerVent/blob/master/Tutorials/Programming%20In-Board/images/arduinobreadboard.JPG
 
 
-[pcbprogramming]: https://github.com/kebroad/TigerVent/blob/master/Tutorials/Programming%20In-Board/images/arduinobreadboard.JPG
+[pcbprogramming]: https://github.com/kebroad/TigerVent/blob/master/Tutorials/Programming%20In-Board/images/pcbprogramming.JPG
